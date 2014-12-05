@@ -36,3 +36,21 @@ self.layer.borderWidth = 1.;
 self.layer.borderColor = [[UIColor grayColor] CGColor];//此属性不能在IB中设置,因为IB中并没有CGColor类型
 self.layer.cornerRadius = 8.0f;
 ```
+
+8.关于在UILabel下使用.layer属性设置边框过大时，边框会挡住文字的情况,如图：
+<img src="/imgCaps/8-1.png">
+
+当然，最好的办法就是居中显示文字，但是如果不想居中显示文字，那解决办法又是怎样呢？先来看看解决的效果，如下：
+<img src="/imgCaps/8-2.png">
+
+是不是很完美的解决了？其实很简单，就是自定义一个UILabel的子类：
+```swift
+class Mylabel: UILabel {
+  override func drawTextInRect(rect: CGRect) {
+    let insets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+    return super.drawTextInRect(UIEdgeInsetsInsetRect(rect, insets))
+  }
+}
+```
+对，只需要重写这个方法就一切OK了！
+
