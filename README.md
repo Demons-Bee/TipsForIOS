@@ -54,3 +54,47 @@ class Mylabel: UILabel {
 ```
 对，只需要重写这个方法就一切OK了！
 
+9.判断应用是否是第一次安装或者第一次启动的最佳方法：
+  第一种是通过NSUserDefaults设置一个bool值进行判断：
+  ```swift
+  if !NSUserDefaults.standardUserDefaults().boolForKey("firstLaunch") {
+      NSUserDefaults.standardUserDefaults().setBool(true, forKey: "firstLaunch")
+      println("第一次启动")
+    } else {
+      println("已经不是第一次启动了")
+    }
+  ```
+  这种方式已经能过满足判断应用是否第一次启动的需求了，但是不能判断应用在该台设备是否是第一次安装
+  
+  第二种是通过KeyChain存储一个任意值进行判断，这里用到了一个封装的不错的类[KeychainWrapper](https://github.com/DahanHu/KeychainWrapper):
+  ```swift
+  if KeychainWrapper.stringForKey(kUDID) == nil {
+      KeychainWrapper.setString(String().generateUUID(), forKey: kUDID)
+      println("第一次安装")
+    } else {
+      println("已经不是第一次安装了")
+    }
+  ```
+  这种方式的好处在于，不仅能判断应用是否是第一次启动，还能判断用户是否是第一次安装。当然，如果用户的手机保持的KeyChain数据由于系统升级或者是其他不明原因造成了丢失就不能保证了，但是这已经足够应对大部分需求，比如还可以保存用户密码，即使用户已经卸载应用、可以为设备添加一个UDID保存在KeyChain等。
+  上述```swift String().generateUUID() ```为```String```扩展，代码如下：
+  ```swift
+  extension String {
+  
+    func generateUUID() -> String {
+      var uuid = ""
+      var uuidRef: CFUUIDRef?
+      var uuidStringRef: CFStringRef?
+      uuidRef = CFUUIDCreate(kCFAllocatorDefault)
+      uuidStringRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef)
+      
+      if uuidRef != nil {
+        uuidRef = nil
+      }
+      if uuidStringRef != nil {
+        uuid = uuidStringRef! as NSString
+      }
+      return uuid
+    }
+  
+  }
+  ```
